@@ -1,0 +1,10 @@
+{
+  "id": "snake2.5d",
+  "version": "1.0.0",
+  "vendor": "My Company",
+  "type": "web",
+  "main": "index.html",
+  "title": "Snake2.5D",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png"
+}
