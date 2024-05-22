@@ -5,7 +5,9 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 //import Snake from './snake.js';	
 
 import { CheckIfWebGLAvaible } from './CheckProblems.js';
+import Game from './Game.js';
 
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 let canvas = null;
 let renderer = null;
 let camera = null;
@@ -14,6 +16,9 @@ let controls = null;
 let gui = null;
 
 let renderRequested = false;
+let game = null;
+
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 
 function makeCube(color, x ) {
     const material = new THREE.MeshPhongMaterial( { color } );
@@ -51,6 +56,8 @@ function init(){
 
 	scene = new THREE.Scene();
 
+    game = new Game();
+
     window.addEventListener( 'resize', requestRender );
 }
 
@@ -67,6 +74,9 @@ function build(){
     const light = new THREE.DirectionalLight( color, intensity );
     light.position.set( - 1, 2, 4 );
     scene.add( light );
+
+    game.createBoard();
+    scene.add( game.gameGroup );
 
     makeCube(0x44aa88, 0 );
 	makeCube(0x8844aa, - 2 );
