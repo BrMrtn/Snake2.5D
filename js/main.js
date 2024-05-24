@@ -7,7 +7,7 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { CheckIfWebGLAvaible } from './CheckProblems.js';
 import Game from './Game.js';
 
-/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 let canvas = null;
 let renderer = null;
 let camera = null;
@@ -18,26 +18,7 @@ let gui = null;
 let renderRequested = false;
 let game = null;
 
-/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
-
-function makeCube(color, x ) {
-    const material = new THREE.MeshPhongMaterial( { color } );
-    let geometry = new THREE.BoxGeometry( 1, 1, 1 );
-
-    let cube = new THREE.Mesh( geometry, material );
-    scene.add( cube );
-
-    cube.position.x = x;
-
-    const folder = gui.addFolder( `Cube${x}` );
-    folder.add( cube.scale, 'x', .1, 1.5 )
-    	.name( 'scale x' )
-    	.onChange( requestRender );
-    folder.open();
-
-    return cube;
-}
-
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 function init(){
     canvas = document.querySelector( '#canvas' );
     CheckIfWebGLAvaible(canvas);
@@ -52,13 +33,43 @@ function init(){
 	controls.target.set( 0, 0, 0 );
     controls.addEventListener( 'change', requestRender );
 
-	gui = new GUI();
-
 	scene = new THREE.Scene();
 
-    game = new Game();
+    game = new Game(renderer, scene, camera);
+
+    scene.scale.set(game.boardScale, game.boardScale, game.boardScale);
+
+    // Initialize GUI
+    gui = new GUI();
+
+    let gameSettings = gui.addFolder( 'Game Setings' );
+    gameSettings.add( game, 'boardSize', 4, 30 )
+        .step( 1 )
+        .onChange(() => {
+            game.createBoard();
+            game.snake.createSnake(game.boardSize);
+            scene.scale.set(game.boardScale, game.boardScale, game.boardScale);
+            requestRender(); });
+    gameSettings.add( game, 'snakeUpdateTime', 50, 500 )
+        .step(10);
+    gameSettings.open();
 
     window.addEventListener( 'resize', requestRender );
+    window.addEventListener( 'keydown', (event) => {
+        if (event.key === 'ArrowUp') {
+            game.snake.changeVelocity(0, 1);
+        } else if (event.key === 'ArrowDown') {
+            game.snake.changeVelocity(0, -1);
+        } else if (event.key === 'ArrowLeft') {
+            game.snake.changeVelocity(-1, 0);
+        } else if (event.key === 'ArrowRight') {
+            game.snake.changeVelocity(1, 0);
+        } else if (event.key === ' ') {
+            game.start();
+        } else if (event.key === 'Escape') {
+            game.stop();
+        }
+    });
 }
 
 function build(){
@@ -75,16 +86,14 @@ function build(){
     light.position.set( - 1, 2, 4 );
     scene.add( light );
 
+    // Game board
     game.createBoard();
     scene.add( game.gameGroup );
 
-    makeCube(0x44aa88, 0 );
-	makeCube(0x8844aa, - 2 );
-	makeCube(0xaa8844, 2 );
 }
 
 function render() {
-    renderRequested = undefined;
+    renderRequested = false;
     if ( resizeRendererToDisplaySize( renderer ) ) {
         canvas = renderer.domElement;
         camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -94,7 +103,7 @@ function render() {
     renderer.render( scene, camera );
 }
 
-/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 
 function main() {
 	init();
@@ -104,7 +113,7 @@ function main() {
 
 main();
 
-/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 
 function resizeRendererToDisplaySize(renderer) {
     canvas = renderer.domElement;
