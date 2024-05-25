@@ -21,7 +21,7 @@ export default class Snake {
         this.group.clear();
         for(let i = 0; i < this.startLength; i++) {
             let snakePart = this.snakePartSample.clone();
-            snakePart.position.set(Math.floor(boardSize/2)-i-1, Math.floor(boardSize/2), 0);
+            snakePart.position.set(Math.floor(boardSize/2)-i, Math.floor(boardSize/2), 0);
             this.group.add(snakePart);
         }
     }
@@ -44,6 +44,7 @@ export default class Snake {
         let head = this.group.children[0];
         head.position.x += this.velocity.x;
         head.position.y += this.velocity.y;
+
         
         // Check if the head is out of bounds
         if(head.position.x < 0)
@@ -62,12 +63,20 @@ export default class Snake {
             }
         }
 
+        // Check collision with barriers
+        for(let barrier of this.game.barrierGroup.children) {
+            if(barrier.position.equals(head.position)) {
+                this.game.stop();
+            }
+        }
+
         // Grow and spawn new food if one is eaten
         for(let food of this.game.foodGroup.children) {
             if(food.position.equals(head.position)) {
                 this.game.foodGroup.remove(food);
                 let newTail = oldTail.clone();
                 this.group.add(newTail);
+                this.game.playerFoodScore++;
                 head.geometry = this.changedGeometry;
                 this.game.spawnFood();
             }

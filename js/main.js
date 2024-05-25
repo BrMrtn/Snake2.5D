@@ -39,7 +39,7 @@ function init(){
 
     scene.scale.set(game.boardScale, game.boardScale, game.boardScale);
 
-    // Initialize GUI
+    /*// Initialize GUI
     gui = new GUI();
 
     let gameSettings = gui.addFolder( 'Game Setings' );
@@ -52,7 +52,7 @@ function init(){
             requestRender(); });
     gameSettings.add( game, 'snakeUpdateTime', 50, 500 )
         .step(10);
-    gameSettings.open();
+    gameSettings.open();*/
 
     window.addEventListener( 'resize', requestRender );
     window.addEventListener( 'keydown', (event) => {
@@ -64,8 +64,6 @@ function init(){
             game.snake.changeVelocity(-1, 0);
         } else if (event.key === 'ArrowRight') {
             game.snake.changeVelocity(1, 0);
-        } else if (event.key === ' ') {
-            game.start();
         } else if (event.key === 'Escape') {
             game.stop();
         }
@@ -89,7 +87,6 @@ function build(){
     // Game board
     game.createBoard();
     scene.add( game.gameGroup );
-
 }
 
 function render() {
@@ -130,4 +127,32 @@ function requestRender() {
     }
 }
 
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 
+document.getElementById('startButton').addEventListener('click', () => {
+    document.getElementById('titleScreen').style.visibility = 'hidden';
+    setTimeout(() => {game.start(document.getElementById('name').value)}, 500);
+});
+
+document.getElementById('boardSize').addEventListener('input', () => {
+    game.boardSize = document.getElementById('boardSize').value;
+    document.getElementById('boardSize_value').innerHTML = game.boardSize;
+    game.createBoard();
+    game.snake.createSnake(game.boardSize);
+    scene.scale.set(game.boardScale, game.boardScale, game.boardScale);
+    scene.add( game.gameGroup );
+    requestRender();
+});
+
+document.getElementById('snakeUpdateTime').addEventListener('input', () => {
+    game.snakeUpdateTime = document.getElementById('snakeUpdateTime').value;
+    document.getElementById('snakeUpdateTime_value').innerHTML = game.snakeUpdateTime;
+});
+
+document.getElementById('leaderboardButton').addEventListener('click', () => {
+    document.getElementById('leaderboardScreen').style.visibility = 'visible';
+});
+
+document.getElementById('closeLeaderboardButton').addEventListener('click', () => {
+    document.getElementById('leaderboardScreen').style.visibility = 'hidden';
+});

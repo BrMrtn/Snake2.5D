@@ -28,8 +28,41 @@
 	</script>
 </head>
 <body>
-	<canvas id="canvas"></canvas>
+	<div id="titleScreen" class="menu">
+		<h1 class="title">Snake</h1>
+		<p class="name_label">Your name</p>
+		<input id="name" class="name_input" type="text">
+		<button id="startButton" class="button">Start Game</button>
+		<button id="leaderboardButton" class="button">Leaderboard</button>
+		<h3 class="subtitle">Settings</h3>
+		<p class="text">Board size</p>
+		<div class="setting">
+			<input id="boardSize" class="input" type="range" min="5" max="30" step="1" value="10">
+			<div id="boardSize_value" class="value">10</div>
+		</div>
+		<br/>
+		<p class="text">Snake Update Time</p>
+		<div class="setting">
+			<input id="snakeUpdateTime" class="input" type="range" min="50" max="500" step="10" value="200">
+			<div id="snakeUpdateTime_value" class="value">200</div>
+		</div>
+	</div>
 
-	<script type="module" src="js/main.js"></script>
+	<div id="leaderboardScreen" class="menu">
+		<h1 class="title">Leaderboard</h1>
+		<table class="leaderboard">
+			<tr><th>Rank</th><th>Name</th><th>Score</th></th>
+		</table>
+		<div class="scrollDiv">
+			<table id="leaderboardTable" class="leaderboard"> </table>
+		</div>
+		<button id="closeLeaderboardButton" class="button">Close</button>
+	</div>
+
+	<canvas id="canvas">
+		Your browser does not support the HTML5 canvas element.
+	</canvas>
+
+	<script type="module" src="js/Main.js"></script>
 </body>
 </html>
