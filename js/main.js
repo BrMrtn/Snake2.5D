@@ -1,8 +1,5 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-//import * as Test from './Test.js';
-//import Snake from './snake.js';	
 
 import { CheckIfWebGLAvaible } from './CheckProblems.js';
 import Game from './Game.js';
@@ -34,25 +31,13 @@ function init(){
     controls.addEventListener( 'change', requestRender );
 
 	scene = new THREE.Scene();
-
+    const background = new THREE.TextureLoader().load( './assets/backiee-200404-landscape.jpg',
+        () => { background.minFilter = THREE.LinearFilter; scene.background = background; requestRender(); });
+    renderer.gammaFactor = 2.2;
+    
     game = new Game(renderer, scene, camera);
 
     scene.scale.set(game.boardScale, game.boardScale, game.boardScale);
-
-    /*// Initialize GUI
-    gui = new GUI();
-
-    let gameSettings = gui.addFolder( 'Game Setings' );
-    gameSettings.add( game, 'boardSize', 4, 30 )
-        .step( 1 )
-        .onChange(() => {
-            game.createBoard();
-            game.snake.createSnake(game.boardSize);
-            scene.scale.set(game.boardScale, game.boardScale, game.boardScale);
-            requestRender(); });
-    gameSettings.add( game, 'snakeUpdateTime', 50, 500 )
-        .step(10);
-    gameSettings.open();*/
 
     window.addEventListener( 'resize', requestRender );
     window.addEventListener( 'keydown', (event) => {
@@ -71,18 +56,15 @@ function init(){
 }
 
 function build(){
-    // Ambient light
-    let color = 0xFF5733;
-    let intensity = 1;
-    let lightAmbient = new THREE.AmbientLight( color, intensity );
+    // Lights
+    let lightAmbient = new THREE.AmbientLight( 0xFF5733, 1 );
     scene.add( lightAmbient );
 
-    // Directional light
-    color = 0x00A8CC;
-    intensity = 3;
-    const light = new THREE.DirectionalLight( color, intensity );
+    const light = new THREE.DirectionalLight( 0xAAA8CC, 5 );
     light.position.set( - 1, 2, 4 );
     scene.add( light );
+
+    // Backgrround 
 
     // Game board
     game.createBoard();

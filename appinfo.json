@@ -1,10 +1,10 @@
 {
   "id": "snake2.5d",
   "version": "1.0.0",
-  "vendor": "My Company",
+  "vendor": "Marton Biro",
   "type": "web",
   "main": "index.html",
   "title": "Snake2.5D",
   "icon": "./assets/icon.png",
-  "largeIcon": "largeIcon.png"
+  "largeIcon": "./assets/icon.png"
 }

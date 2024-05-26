@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 import Snake from './Snake.js';
 import Leaderboard from './Leaderboard.js';
@@ -14,13 +15,13 @@ export default class Game {
         //Non-changeable game constants
         this.boardScale = 4/10;
         this.cubeSize = 1;
-        this.moveIntervalID;
-        this.barrierIntervalID;
+        this.moveIntervalID = null;
+        this.barrierIntervalID = null;
         this.renderer = renderer;
         this.scene = scene;
         this.camera = camera;
         this.started = false;
-        this.playerName;
+        this.playerName = null;
         this.playerFoodScore = 0;
 
         //Leaderboard data
@@ -44,29 +45,17 @@ export default class Game {
         this.gameGroup.add(this.barrierGroup);
         this.gameGroup.position.set(-(this.boardSize-1) / 2, -(this.boardSize-1) / 2, 0);
 
-        //Food
-        this.foodGeometry = new THREE.BoxGeometry(this.snake.changedSize, this.snake.changedSize, this.snake.changedSize);
-        this.foodMaterial = new THREE.MeshPhongMaterial({color: 0xff0000});
-        this.foodSample = new THREE.Mesh(this.foodGeometry, this.foodMaterial);
+        this.loader = new GLTFLoader();
 
         //Barrier
+        this.barrierBoxGeometry = new THREE.BoxGeometry(this.snake.changedSize, this.snake.changedSize, this.snake.changedSize);
+        this.barrierGeometry = new THREE.BoxGeometry(this.snake.size, this.snake.size, this.snake.size);
         this.barrierMaterial = new THREE.MeshPhongMaterial({color: 0x202020});
-        this.barrierSample = new THREE.Mesh(this.foodGeometry, this.barrierMaterial);
+        this.barrierSample = new THREE.Mesh(this.barrierGeometry, this.barrierMaterial);
     }
 
     createBoard() {
         this.boardGroup.clear();
-        /*for (let i = 0; i < this.boardSize; i++) {
-            for (let j = 0; j < this.boardSize; j++) {
-                let geometry = new THREE.BoxGeometry(1, 1, 1);
-                let wireframe = new THREE.EdgesGeometry(geometry);
-                let edges = new THREE.LineSegments(wireframe);
-                edges.material.opacity = 0.05;
-                edges.material.transparent = true;
-                edges.position.set(i, j, 0);
-                this.boardGroup.add(edges);
-            }
-        }*/
         let geometry = new THREE.BoxGeometry(this.boardSize, this.boardSize, 1);
         let material = new THREE.LineBasicMaterial({color: 0xaa00ff});
         let wireframe = new THREE.EdgesGeometry(geometry);
@@ -79,11 +68,33 @@ export default class Game {
     }
 
     spawnFood() {
-        let food = this.foodSample.clone();
         let x = Math.floor(Math.random() * this.boardSize);
         let y = Math.floor(Math.random() * this.boardSize);
-        food.position.set(x, y, 0);
-        this.foodGroup.add(food);
+
+        // Check if the food is on the snake
+        for(let snakePart of this.snake.group.children) {
+            if(snakePart.position.equals(new THREE.Vector3(x, y, 0))) {
+                this.spawnFood();
+                return;
+            }
+        }
+
+        // Check if the food is on a barrier
+        for(let barrier of this.barrierGroup.children) {
+            if(barrier.position.equals(new THREE.Vector3(x, y, 0))) {
+                this.spawnFood();
+                return;
+            }
+        }
+
+        let foodContainer = new THREE.Object3D(); // container for the loaded model - it's origo is not in (0, 0, 0)
+        this.loader.load('./assets/apple/scene.gltf', (gltf) => {
+            gltf.scene.scale.set(0.004, 0.004, 0.004);
+            gltf.scene.position.set(0.15, -0.4, -0.15);
+            foodContainer.add(gltf.scene);
+        });
+        foodContainer.position.set(x, y, 0);
+        this.foodGroup.add(foodContainer);
     }
 
     spawnBarrier(depth) {
@@ -91,6 +102,15 @@ export default class Game {
         let x = Math.floor(Math.random() * this.boardSize);
         let y = Math.floor(Math.random() * this.boardSize);
 
+        // Check if the barrier is on the food
+        for(let food of this.foodGroup.children) {
+            if(food.position.equals(new THREE.Vector3(x, y, 0))) {
+                this.spawnBarrier(depth+1);
+                return;
+            }
+        }
+
+        // Check if the barrier is near the snake
         for(let snakePart of this.snake.group.children) {
             if((x-snakePart.position.x) ** 2 + (y-snakePart.position.y) ** 2 < 16) {
                 this.spawnBarrier(depth+1);
@@ -100,7 +120,7 @@ export default class Game {
 
         let barrier = this.barrierSample.clone();
         let barrierBoxMaterial = new THREE.LineBasicMaterial({color: 0xaa00ff});
-        let wireframe = new THREE.EdgesGeometry(this.foodGeometry);
+        let wireframe = new THREE.EdgesGeometry(this.barrierBoxGeometry);
         let boudingBox = new THREE.LineSegments(wireframe, barrierBoxMaterial);
         barrier.position.set(x, y, 0);
         boudingBox.position.set(x, y, 0);
@@ -113,11 +133,12 @@ export default class Game {
         if(this.started)
             return;
         this.started = true;
-        this.spawnFood();
+        this.spawnFood(10);
         this.moveIntervalID = setInterval(() => {
             this.snake.move();
             this.renderer.render( this.scene, this.camera );
         }, this.snakeUpdateTime);
+
         this.barrierIntervalID = setInterval(() => {
             this.spawnBarrier(0);
         }, 5000);
@@ -150,7 +171,7 @@ export default class Game {
         let score = Math.floor(this.playerFoodScore * updateTimeMultiplier * boardSizeMultiplier);
 
         if(this.playerName) this.leaderboard.addPlayer({name: this.playerName, score: score});
-            this.leaderboard.writePlayers();
+        this.leaderboard.writePlayers();
 
         // Write leaderboard to HTML
         let leaderboardHTML = "";

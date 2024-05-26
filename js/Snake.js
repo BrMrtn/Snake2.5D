@@ -5,13 +5,17 @@ export default class Snake {
         this.game = game;
         this.headPosition = {x: 0, y: 0};
         this.velocity = {x: 1, y: 0};
+        this.isVelocityChangeable = true;
         this.startLength = 3;
+        this.clock = new THREE.Clock();
 
         this.group = new THREE.Group();
-        this.size = 0.8; this.changedSize = 0.95;
+        this.size = 0.8; this.changedSize = 0.95; this.tailSize = 0.65;
         this.geometry = new THREE.BoxGeometry(this.size, this.size, this.size); //Maybe ExtrudeGeometry
         this.material = new THREE.MeshNormalMaterial();
         this.snakePartSample = new THREE.Mesh(this.geometry, this.material);
+
+        this.tailGeometry = new THREE.BoxGeometry(this.tailSize, this.tailSize, this.tailSize);
 
         // For changing the size of the bodypart when a food was eaten
         this.changedGeometry = new THREE.BoxGeometry(this.changedSize, this.changedSize, this.changedSize);
@@ -24,6 +28,7 @@ export default class Snake {
             snakePart.position.set(Math.floor(boardSize/2)-i, Math.floor(boardSize/2), 0);
             this.group.add(snakePart);
         }
+        this.group.children[this.startLength-1].geometry = this.tailGeometry;
     }
 
     move() {
@@ -39,12 +44,16 @@ export default class Snake {
                 this.group.children[i-1].geometry = this.geometry;
             }
         }
-        this.group.children[this.group.children.length-1].geometry = this.geometry; 
+        this.group.children[this.group.children.length-1].geometry = this.tailGeometry;
         
         let head = this.group.children[0];
-        head.position.x += this.velocity.x;
-        head.position.y += this.velocity.y;
 
+        let currentVelocity = this.velocity; // To prevent the snake from changing direction multiple times in one frame
+        let startPosition = head.position.clone();
+        let endPosition = new THREE.Vector3(startPosition.x + currentVelocity.x, startPosition.y + currentVelocity.y, 0);
+        /*Possibly animate movement here*/
+
+        head.position.copy(endPosition); // place the head where it should be - in case of floating point errors
         
         // Check if the head is out of bounds
         if(head.position.x < 0)
@@ -80,19 +89,17 @@ export default class Snake {
                 head.geometry = this.changedGeometry;
                 this.game.spawnFood();
             }
-            // Check if the food is on the snake. If so, delete it and spawn a new food.
-            for (let j = 1; j < this.group.children.length; j++) {
-                if(this.game.foodGroup.children[0].position.equals(this.group.children[j].position)) {
-                    this.game.foodGroup.remove(this.game.foodGroup.children[0]);
-                    this.game.spawnFood();
-                }
-            }
         }
+
+        this.isVelocityChangeable = true;
     }
 
     changeVelocity(x, y) {
-        if(this.velocity.x != -x && this.velocity.y != -y) {
-            this.velocity = {x, y};
+        if(this.isVelocityChangeable){ // Prevent changing the direction multiple times in one frame
+            if(this.velocity.x != -x && this.velocity.y != -y) {
+                this.velocity = {x, y};
+            }
         }
+        this.isVelocityChangeable = false;
     }
 }
