@@ -79,8 +79,6 @@ function build(){
     light.position.set( - 1, 2, 4 );
     scene.add( light );
 
-    // Backgrround 
-
     // Game board
     game.createBoard();
     scene.add( game.gameGroup );
