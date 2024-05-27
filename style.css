@@ -56,7 +56,13 @@ html, body{
 }
 
 .name_input{
-    margin-right: 20px;
+    margin-bottom: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+    background-color: #f1f1f1;
 }
 
 .title{
@@ -70,16 +76,6 @@ html, body{
 .name_label {
     margin-top: 20px;
     margin-bottom: 10px;
-}
-
-.name_input {
-    margin-bottom: 10px;
-    margin-left: auto;
-    margin-right: auto;
-    font-size: 20px;
-    font-family: 'Courier New', Courier, monospace;
-    text-align: center;
-    background-color: #f1f1f1;
 }
 
 .button{
