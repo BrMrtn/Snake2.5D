@@ -10,10 +10,10 @@ let renderer = null;
 let camera = null;
 let scene = null;
 let controls = null;
-let gui = null;
 
 let renderRequested = false;
 let game = null;
+let mouseInput = false;
 
 /* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
 function init(){
@@ -41,16 +41,31 @@ function init(){
 
     window.addEventListener( 'resize', requestRender );
     window.addEventListener( 'keydown', (event) => {
-        if (event.key === 'ArrowUp') {
-            game.snake.changeVelocity(0, 1);
-        } else if (event.key === 'ArrowDown') {
-            game.snake.changeVelocity(0, -1);
-        } else if (event.key === 'ArrowLeft') {
-            game.snake.changeVelocity(-1, 0);
-        } else if (event.key === 'ArrowRight') {
-            game.snake.changeVelocity(1, 0);
-        } else if (event.key === 'Escape') {
-            game.stop();
+        if(! mouseInput){
+            if (event.key === 'ArrowUp') {
+                game.snake.changeVelocity(0, 1);
+            } else if (event.key === 'ArrowDown') {
+                game.snake.changeVelocity(0, -1);
+            } else if (event.key === 'ArrowLeft') {
+                game.snake.changeVelocity(-1, 0);
+            } else if (event.key === 'ArrowRight') {
+                game.snake.changeVelocity(1, 0);
+            } else if (event.key === 'Escape') {
+                game.stop();
+            }
+        }
+    });
+
+    window.addEventListener( 'mousemove', (event) => {
+        if(mouseInput){
+            if(event.clientX > 0.9*window.innerWidth)
+                game.snake.changeVelocity(1, 0);
+            if(event.clientX < 0.1*window.innerWidth)
+                game.snake.changeVelocity(-1, 0);
+            if(event.clientY > 0.9*window.innerHeight)
+                game.snake.changeVelocity(0, -1);
+            if(event.clientY < 0.1*window.innerHeight)
+                game.snake.changeVelocity(0, 1);
         }
     });
 }
@@ -137,4 +152,12 @@ document.getElementById('leaderboardButton').addEventListener('click', () => {
 
 document.getElementById('closeLeaderboardButton').addEventListener('click', () => {
     document.getElementById('leaderboardScreen').style.visibility = 'hidden';
+});
+
+document.getElementById('changeInputButton').addEventListener('click', () => {
+    mouseInput = !mouseInput;
+    if(mouseInput)
+        document.getElementById('changeInputButton').innerHTML = 'Current input mode: Mouse/Pointer';
+    else
+        document.getElementById('changeInputButton').innerHTML = 'Current input mode: Keyboard/5-way';
 });
