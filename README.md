@@ -1,4 +1,4 @@
-This project was a homework for Software Development for Consumer Electronic Devices at  in 2023/24/2.
+This project was a homework for Software Development for Consumer Electronic Devices in 2023/24/2.
 
 I stole some assets off the internet:
 - Background by u/Individual_Ear8852
